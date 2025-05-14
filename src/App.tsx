@@ -1,4 +1,5 @@
 
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import { ThemeProvider } from "next-themes";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import Assignments from "./pages/Assignments";
+import Students from "./pages/Students";
 import Notes from "./pages/Notes";
 import Notices from "./pages/Notices";
 import Profile from "./pages/Profile";
@@ -27,6 +29,7 @@ const App = () => (
             <Route path="/" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="assignments" element={<Assignments />} />
+              <Route path="students" element={<Students />} />
               <Route path="notes" element={<Notes />} />
               <Route path="notices" element={<Notices />} />
               <Route path="profile" element={<Profile />} />
