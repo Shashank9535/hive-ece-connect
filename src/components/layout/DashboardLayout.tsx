@@ -1,5 +1,4 @@
 
-
 import { 
   SidebarProvider, 
   Sidebar, 
@@ -17,28 +16,18 @@ import { Home, BookOpen, Calendar, Bell, FileText, User, Settings, Users } from 
 import { Link, Outlet } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-// CampusHive logo component - based on your provided logo
+// CampusHive logo component based on the uploaded image
 function CampusHiveLogo() {
   return (
     <div className="flex items-center gap-2">
-      <div className="w-8 h-8 bg-emerald-600 text-white flex items-center justify-center rounded-md">
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2" 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-          className="h-5 w-5"
-        >
-          <path d="M18 8a6 6 0 0 0-6-6 6 6 0 0 0-6 6 8 8 0 0 0 12 13" />
-          <path d="M6 8h12" />
-          <path d="M8 12h8" />
-          <path d="M9 16h6" />
+      <div className="relative w-8 h-8">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-full h-full">
+          <path d="M50,0L93.3,25v50L50,100L6.7,75V25L50,0z" fill="#289B48" />
+          <path d="M35,35c0-8.3,6.7-15,15-15s15,6.7,15,15v10c0,1.7-1.3,3-3,3h-4v-13c0-4.4-3.6-8-8-8s-8,3.6-8,8v13h-4c-1.7,0-3-1.3-3-3V35z" fill="white" />
+          <path d="M50,75c-8.3,0-15-6.7-15-15h8c0,3.9,3.1,7,7,7s7-3.1,7-7h8C65,68.3,58.3,75,50,75z" fill="white" />
         </svg>
       </div>
-      <span className="font-bold text-lg text-emerald-700 dark:text-emerald-400">CampusHive</span>
+      <span className="font-bold text-xl text-green-700 dark:text-green-400">CampusHive</span>
     </div>
   );
 }
@@ -48,8 +37,8 @@ export default function DashboardLayout() {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <Sidebar>
-          <SidebarHeader className="border-b border-emerald-100 dark:border-emerald-800/50">
-            <div className="flex items-center px-4 py-2">
+          <SidebarHeader className="border-b border-green-100 dark:border-green-800/50">
+            <div className="flex items-center px-4 py-3">
               <div className="flex flex-col">
                 <CampusHiveLogo />
                 <p className="text-xs text-muted-foreground">ECE 6th Semester</p>
@@ -141,14 +130,14 @@ export default function DashboardLayout() {
         </Sidebar>
         
         <main className="flex-1 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-emerald-100 dark:border-emerald-800/30 p-4 bg-white dark:bg-gray-950">
+          <div className="flex items-center justify-between border-b border-green-100 dark:border-green-800/30 p-4 bg-white dark:bg-gray-950">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <h1 className="font-semibold text-emerald-700 dark:text-emerald-400">Campus Hive</h1>
+              <h1 className="font-semibold text-green-700 dark:text-green-400">Campus Hive</h1>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm">John Doe</span>
-              <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center">
+              <div className="h-8 w-8 rounded-full bg-green-600 text-white flex items-center justify-center">
                 JD
               </div>
             </div>

@@ -1,5 +1,4 @@
 
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import Assignments from "./pages/Assignments";
 import Students from "./pages/Students";
 import Notes from "./pages/Notes";
 import Notices from "./pages/Notices";
+import About from "./pages/About";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +32,7 @@ const App = () => (
               <Route path="students" element={<Students />} />
               <Route path="notes" element={<Notes />} />
               <Route path="notices" element={<Notices />} />
+              <Route path="about" element={<About />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Profile />} /> {/* Temporary using Profile for Settings */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

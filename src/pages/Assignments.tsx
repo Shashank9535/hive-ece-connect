@@ -1,60 +1,74 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, Search, Filter } from "lucide-react";
-import { Link } from "react-router-dom";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { FileText, Plus, Search, Calendar } from "lucide-react";
 
-const mockAssignments = [
+// Mock data
+const assignmentsData = [
   {
     id: 1,
-    subject: "Digital Signal Processing",
-    title: "FFT Algorithm Implementation",
-    dueDate: "2023-05-25",
-    status: "in-progress",
-    description: "Implement FFT algorithm in MATLAB or Python and analyze its performance."
+    title: "Digital Signal Processing: Lab Report",
+    subject: "DSP",
+    description: "Complete the FFT implementation and submit with graphs",
+    dueDate: "2025-05-25",
+    status: "pending"
   },
   {
     id: 2,
-    subject: "Computer Networks",
-    title: "Network Protocols Analysis",
-    dueDate: "2023-05-28",
-    status: "in-progress",
-    description: "Analyze and compare TCP, UDP, and SCTP protocols with practical examples."
+    title: "VLSI Design: Circuit Simulation",
+    subject: "VLSI",
+    description: "Create and test the CMOS inverter circuit in Cadence",
+    dueDate: "2025-05-28",
+    status: "completed"
   },
   {
     id: 3,
-    subject: "VLSI Design",
-    title: "CMOS Layout Design",
-    dueDate: "2023-06-02",
-    status: "not-started",
-    description: "Design a simple CMOS circuit layout using industry-standard EDA tools."
+    title: "Computer Networks: Socket Programming",
+    subject: "CN",
+    description: "Implement a client-server chat application using TCP sockets",
+    dueDate: "2025-06-02",
+    status: "pending"
   },
   {
     id: 4,
-    subject: "Embedded Systems",
-    title: "Arduino-based IoT Project",
-    dueDate: "2023-06-10",
-    status: "not-started",
-    description: "Develop an IoT application using Arduino and demonstrate its functionality."
+    title: "Embedded Systems: Programming Exercise",
+    subject: "ES",
+    description: "Program the Arduino board for temperature monitoring system",
+    dueDate: "2025-06-05",
+    status: "pending"
+  },
+  {
+    id: 5,
+    title: "Control Systems: Stability Analysis",
+    subject: "CS",
+    description: "Analyze the stability of given transfer functions using MATLAB",
+    dueDate: "2025-06-10",
+    status: "not-started"
   }
 ];
 
-const subjects = [
-  "All Subjects",
-  "Digital Signal Processing",
-  "Computer Networks",
-  "VLSI Design", 
-  "Embedded Systems"
-];
+// Subject options for filter
+const subjectOptions = ["All", "DSP", "VLSI", "CN", "ES", "CS"];
+
+// Status options for filter
+const statusOptions = ["All", "pending", "completed", "not-started"];
 
 export default function Assignments() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [subjectFilter, setSubjectFilter] = useState("All Subjects");
+  const [subjectFilter, setSubjectFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
   
+  // Format date for display
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -62,140 +76,167 @@ export default function Assignments() {
       day: "numeric"
     });
   };
-  
-  const getStatusBadgeClass = (status: string) => {
-    switch(status) {
-      case 'completed':
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
-      case 'in-progress':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
-      default:
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+
+  // Get days remaining
+  const getDaysRemaining = (dueDate: string) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  // Get status badge
+  const getStatusBadge = (status: string, daysRemaining: number) => {
+    if (status === "completed") {
+      return <Badge className="bg-green-500 hover:bg-green-600">Completed</Badge>;
+    } else if (status === "not-started") {
+      return <Badge className="bg-gray-500 hover:bg-gray-600">Not Started</Badge>;
+    } else if (daysRemaining < 0) {
+      return <Badge className="bg-red-500 hover:bg-red-600">Overdue</Badge>;
+    } else if (daysRemaining <= 3) {
+      return <Badge className="bg-orange-500 hover:bg-orange-600">Due Soon</Badge>;
+    } else {
+      return <Badge className="bg-blue-500 hover:bg-blue-600">In Progress</Badge>;
     }
   };
 
-  // Filter assignments based on search, status, and subject
-  const filteredAssignments = mockAssignments.filter(assignment => {
+  // Filter assignments
+  const filteredAssignments = assignmentsData.filter(assignment => {
     const matchesSearch = 
       assignment.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      assignment.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
       assignment.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesStatus = statusFilter === 'all' || assignment.status === statusFilter;
     
-    const matchesSubject = 
-      subjectFilter === 'All Subjects' || 
-      assignment.subject === subjectFilter;
+    const matchesSubject = subjectFilter === "All" || assignment.subject === subjectFilter;
     
-    return matchesSearch && matchesStatus && matchesSubject;
+    const matchesStatus = statusFilter === "All" || assignment.status === statusFilter;
+    
+    return matchesSearch && matchesSubject && matchesStatus;
   });
-  
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-emerald-700 dark:text-emerald-500">Assignments</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-green-700 dark:text-green-500">Assignments</h2>
           <p className="text-muted-foreground">
             Manage and track your course assignments
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button variant="outline" className="border-emerald-200 dark:border-emerald-800">
-            <Link to="/students" className="flex items-center gap-2">
-              View Students
-            </Link>
-          </Button>
-          <Button className="bg-emerald-600 hover:bg-emerald-700">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Assignment
+        <Button className="bg-green-600 hover:bg-green-700">
+          <Plus className="mr-2 h-4 w-4" />
+          New Assignment
+        </Button>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex items-center space-x-2 flex-1">
+          <Input
+            type="text"
+            placeholder="Search assignments..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="shadow-sm w-full"
+          />
+          <Button type="submit" className="bg-green-600 hover:bg-green-700">
+            <Search className="h-4 w-4" />
           </Button>
         </div>
+        
+        <div className="flex flex-col md:flex-row gap-2">
+          <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by subject" />
+            </SelectTrigger>
+            <SelectContent>
+              {subjectOptions.map(subject => (
+                <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map(status => (
+                <SelectItem key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-      
-      <Card className="bg-emerald-50/50 dark:bg-emerald-900/5 border-emerald-100 dark:border-emerald-900/30">
-        <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col md:flex-row gap-4 items-stretch">
-            <div className="flex-grow flex max-w-md items-center gap-2">
-              <Input
-                type="text"
-                placeholder="Search assignments..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="border-emerald-200 dark:border-emerald-800"
-              />
-              <Button variant="outline" size="icon" className="shrink-0 border-emerald-200 dark:border-emerald-800">
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Select 
-                value={statusFilter} 
-                onValueChange={setStatusFilter}
-              >
-                <SelectTrigger className="w-[180px] border-emerald-200 dark:border-emerald-800">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="not-started">Not Started</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select 
-                value={subjectFilter} 
-                onValueChange={setSubjectFilter}
-              >
-                <SelectTrigger className="w-[180px] border-emerald-200 dark:border-emerald-800">
-                  <SelectValue placeholder="Filter by subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject} value={subject}>
-                      {subject}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+      <Card className="border border-green-100 dark:border-green-900/30">
+        <CardHeader className="bg-green-50 dark:bg-green-900/20 py-4">
+          <CardTitle className="text-xl font-bold text-green-700 dark:text-green-400">Assignment List</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-auto">
+            {filteredAssignments.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">
+                No assignments found matching your criteria.
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-green-100 dark:bg-green-900/30 text-left">
+                    <th className="p-3 font-medium">Title</th>
+                    <th className="p-3 font-medium hidden md:table-cell">Subject</th>
+                    <th className="p-3 font-medium hidden lg:table-cell">Description</th>
+                    <th className="p-3 font-medium">Due Date</th>
+                    <th className="p-3 font-medium">Status</th>
+                    <th className="p-3 font-medium text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-green-100 dark:divide-green-800/30">
+                  {filteredAssignments.map((assignment) => {
+                    const daysRemaining = getDaysRemaining(assignment.dueDate);
+                    return (
+                      <tr 
+                        key={assignment.id} 
+                        className="hover:bg-green-50 dark:hover:bg-green-900/10"
+                      >
+                        <td className="p-3 font-medium">{assignment.title}</td>
+                        <td className="p-3 hidden md:table-cell">
+                          <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20">
+                            {assignment.subject}
+                          </Badge>
+                        </td>
+                        <td className="p-3 hidden lg:table-cell text-sm text-muted-foreground line-clamp-1">
+                          {assignment.description}
+                        </td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-green-600" />
+                            <span>{formatDate(assignment.dueDate)}</span>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {daysRemaining > 0 ? `${daysRemaining} days remaining` : 
+                             daysRemaining === 0 ? "Due today" : "Overdue"}
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          {getStatusBadge(assignment.status, daysRemaining)}
+                        </td>
+                        <td className="p-3 text-right">
+                          <Button variant="outline" size="sm" className="hover:bg-green-100 dark:hover:bg-green-900/20">
+                            <FileText className="h-4 w-4" />
+                            <span className="sr-only md:not-sr-only md:ml-2">View</span>
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
           </div>
         </CardContent>
       </Card>
-      
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {filteredAssignments.length > 0 ? (
-          filteredAssignments.map((assignment) => (
-            <Card key={assignment.id} className="border-emerald-100 dark:border-emerald-900/30 transition-all hover:shadow-md">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-bold text-emerald-700 dark:text-emerald-400">{assignment.title}</CardTitle>
-                  <span className={`rounded px-2 py-1 text-xs ${getStatusBadgeClass(assignment.status)}`}>
-                    {assignment.status === 'in-progress' ? 'In Progress' : 
-                     assignment.status === 'completed' ? 'Completed' : 'Not Started'}
-                  </span>
-                </div>
-                <CardDescription className="text-emerald-600 dark:text-emerald-400/70">{assignment.subject}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm">{assignment.description}</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Due Date:</span>
-                    <span className="font-medium text-emerald-700 dark:text-emerald-400">{formatDate(assignment.dueDate)}</span>
-                  </div>
-                  <Button variant="outline" className="w-full border-emerald-200 dark:border-emerald-800 hover:border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">View Details</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <div className="col-span-full flex items-center justify-center p-8 border rounded-lg border-dashed border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400">
-            No assignments found matching your filters.
-          </div>
-        )}
-      </div>
     </div>
   );
 }
