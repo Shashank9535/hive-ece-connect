@@ -15,6 +15,7 @@ import Notices from "./pages/Notices";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import Calendar from "./pages/Calendar";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="notices" element={<Notices />} />
               <Route path="about" element={<About />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="calendar" element={<Calendar />} />
               <Route path="settings" element={<Profile />} /> {/* Temporary using Profile for Settings */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
