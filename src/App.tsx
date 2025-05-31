@@ -23,6 +23,8 @@ import LeaveApplication from "./pages/LeaveApplication";
 import Research from "./pages/Research";
 import FacultyProfile from "./pages/FacultyProfile";
 
+const queryClient = new QueryClient();
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" enableSystem>
