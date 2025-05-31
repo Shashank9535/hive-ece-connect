@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Home, BookOpen, Calendar, Bell, FileText, User, Settings, Users } from "lucide-react";
+import { Home, BookOpen, Calendar, Bell, FileText, User, Settings, Users, Clock } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -22,7 +22,7 @@ function CampusHiveLogo() {
     <div className="flex items-center gap-2">
       <div className="relative w-8 h-8">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-full h-full">
-          <path d="M50,0L93.3,25v50L50,100L6.7,75V25L50,0z" fill="#289B48" />
+          <path d="M50,0L93.3,25v50L50,100L6.7,75V25L50,0z" fill="#059669" />
           <path d="M35,35c0-8.3,6.7-15,15-15s15,6.7,15,15v10c0,1.7-1.3,3-3,3h-4v-13c0-4.4-3.6-8-8-8s-8,3.6-8,8v13h-4c-1.7,0-3-1.3-3-3V35z" fill="white" />
           <path d="M50,75c-8.3,0-15-6.7-15-15h8c0,3.9,3.1,7,7,7s7-3.1,7-7h8C65,68.3,58.3,75,50,75z" fill="white" />
         </svg>
@@ -47,13 +47,21 @@ export default function DashboardLayout() {
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Main</SidebarGroupLabel>
+              <SidebarGroupLabel>Academic</SidebarGroupLabel>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Dashboard">
                     <Link to="/">
                       <Home className="h-4 w-4" />
                       <span>Dashboard</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Attendance">
+                    <Link to="/attendance">
+                      <Clock className="h-4 w-4" />
+                      <span>Attendance</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -66,10 +74,10 @@ export default function DashboardLayout() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Students">
-                    <Link to="/students">
-                      <Users className="h-4 w-4" />
-                      <span>Students</span>
+                  <SidebarMenuButton asChild tooltip="Calendar">
+                    <Link to="/calendar">
+                      <Calendar className="h-4 w-4" />
+                      <span>Calendar</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -81,11 +89,16 @@ export default function DashboardLayout() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+            <SidebarGroup>
+              <SidebarGroupLabel>Community</SidebarGroupLabel>
+              <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Calendar">
-                    <Link to="/calendar">
-                      <Calendar className="h-4 w-4" />
-                      <span>Calendar</span>
+                  <SidebarMenuButton asChild tooltip="Students">
+                    <Link to="/students">
+                      <Users className="h-4 w-4" />
+                      <span>Students</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

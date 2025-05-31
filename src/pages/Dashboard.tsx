@@ -2,18 +2,20 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { FileText, Calendar, AlertCircle, BookOpen, Users, Bell, ExternalLink, GraduationCap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { FileText, Calendar, AlertCircle, BookOpen, Users, Bell, ExternalLink, GraduationCap, Clock, CheckCircle, XCircle } from "lucide-react";
 
 // Mock data - replace with real data later
 const mockStudent = {
   name: "John Doe",
-  rollNumber: "01FB16ECE123",
+  rollNumber: "3VY22UE001",
   department: "Electronics and Computer Engineering",
   semester: "6th Semester",
   attendance: 85,
+  cgpa: 8.7,
   fees: {
-    deadline: "2023-06-30",
-    status: "Pending"
+    deadline: "2025-06-30",
+    status: "Paid"
   }
 };
 
@@ -26,249 +28,307 @@ const formatDate = (dateString: string) => {
   });
 };
 
-// Mock data for features
-const featureCards = [
+// Quick access modules
+const quickAccessModules = [
   {
-    title: "Assignments",
-    description: "View and submit your course assignments",
-    icon: <FileText className="h-10 w-10 text-green-500" />,
-    link: "/assignments"
+    title: "Course Attendance",
+    description: "View attendance records and statistics",
+    icon: <Clock className="h-6 w-6" />,
+    link: "/attendance",
+    color: "bg-blue-50 border-blue-200 text-blue-700"
   },
   {
-    title: "Students",
-    description: "Browse the student directory for your semester",
-    icon: <Users className="h-10 w-10 text-green-500" />,
-    link: "/students"
+    title: "Assignment Portal",
+    description: "Submit and track assignments",
+    icon: <FileText className="h-6 w-6" />,
+    link: "/assignments",
+    color: "bg-green-50 border-green-200 text-green-700"
   },
   {
-    title: "Notes",
-    description: "Access lecture notes and study materials",
-    icon: <BookOpen className="h-10 w-10 text-green-500" />,
-    link: "/notes"
+    title: "Academic Calendar", 
+    description: "Important dates and events",
+    icon: <Calendar className="h-6 w-6" />,
+    link: "/calendar",
+    color: "bg-purple-50 border-purple-200 text-purple-700"
   },
   {
-    title: "Notices",
-    description: "Stay updated with important announcements",
-    icon: <Bell className="h-10 w-10 text-green-500" />,
-    link: "/notices"
+    title: "Student Directory",
+    description: "Browse student information",
+    icon: <Users className="h-6 w-6" />,
+    link: "/students", 
+    color: "bg-orange-50 border-orange-200 text-orange-700"
   },
   {
-    title: "Academic Calendar",
-    description: "Track important academic dates and events",
-    icon: <Calendar className="h-10 w-10 text-green-500" />,
-    link: "/calendar"
+    title: "Notice Board",
+    description: "Latest announcements",
+    icon: <Bell className="h-6 w-6" />,
+    link: "/notices",
+    color: "bg-red-50 border-red-200 text-red-700"
   },
   {
-    title: "Course Portal",
-    description: "Access your course materials and resources",
-    icon: <GraduationCap className="h-10 w-10 text-green-500" />,
-    link: "#"
+    title: "Digital Library",
+    description: "Access notes and resources",
+    icon: <BookOpen className="h-6 w-6" />,
+    link: "/notes",
+    color: "bg-indigo-50 border-indigo-200 text-indigo-700"
+  }
+];
+
+// Recent activities
+const recentActivities = [
+  {
+    title: "Assignment Submitted",
+    description: "Digital Signal Processing Lab Report",
+    time: "2 hours ago",
+    status: "success",
+    icon: <CheckCircle className="h-4 w-4 text-green-600" />
+  },
+  {
+    title: "New Notice Posted",
+    description: "End Semester Exam Schedule Released",
+    time: "5 hours ago", 
+    status: "info",
+    icon: <Bell className="h-4 w-4 text-blue-600" />
+  },
+  {
+    title: "Attendance Updated",
+    description: "Computer Networks - Present",
+    time: "1 day ago",
+    status: "success", 
+    icon: <CheckCircle className="h-4 w-4 text-green-600" />
+  },
+  {
+    title: "Assignment Due Soon",
+    description: "VLSI Design Circuit Simulation due in 2 days",
+    time: "2 days ago",
+    status: "warning",
+    icon: <AlertCircle className="h-4 w-4 text-yellow-600" />
   }
 ];
 
 export default function Dashboard() {
   return (
     <div className="space-y-6">
-      <div className="p-6 bg-white dark:bg-gray-800 rounded-lg border border-green-100 dark:border-green-900/30 shadow-sm">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg p-6 shadow-lg">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-green-700 dark:text-green-500">
-              Welcome, {mockStudent.name}
-            </h2>
-            <p className="text-muted-foreground">
-              {mockStudent.rollNumber} | {mockStudent.department} | {mockStudent.semester}
+            <h1 className="text-3xl font-bold">Welcome to CampusHive</h1>
+            <p className="text-green-100 mt-2">
+              {mockStudent.name} | {mockStudent.rollNumber} | {mockStudent.department}
+            </p>
+            <p className="text-green-100">
+              {mockStudent.semester} | Academic Year 2024-25
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="text-sm text-muted-foreground">
-              Last updated: {formatDate(new Date().toISOString())}
+          <div className="flex items-center gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold">{mockStudent.cgpa}</div>
+              <div className="text-sm text-green-100">CGPA</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold">{mockStudent.attendance}%</div>
+              <div className="text-sm text-green-100">Attendance</div>
             </div>
           </div>
         </div>
       </div>
-      
+
+      {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border border-green-100 dark:border-green-900/30">
+        <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Attendance Status</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Overall Attendance</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStudent.attendance}%</div>
-            <Progress value={mockStudent.attendance} className="mt-2 bg-green-100 dark:bg-green-900/30" />
+            <div className="text-2xl font-bold text-blue-600">{mockStudent.attendance}%</div>
+            <Progress value={mockStudent.attendance} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-2">
-              {mockStudent.attendance >= 75 ? "Good standing" : "Attendance below requirement"}
+              {mockStudent.attendance >= 75 ? "✓ Meets requirement" : "⚠ Below requirement"}
             </p>
           </CardContent>
         </Card>
         
-        <Card className="border border-green-100 dark:border-green-900/30">
+        <Card className="border-l-4 border-l-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Fee Status</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">CGPA</CardTitle>
+            <GraduationCap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStudent.fees.status}</div>
+            <div className="text-2xl font-bold text-green-600">{mockStudent.cgpa}</div>
             <p className="text-xs text-muted-foreground mt-2">
-              Deadline: {formatDate(mockStudent.fees.deadline)}
+              Excellent Performance
             </p>
           </CardContent>
         </Card>
         
-        <Card className="border border-green-100 dark:border-green-900/30">
+        <Card className="border-l-4 border-l-orange-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Assignments</CardTitle>
+            <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold text-orange-600">3</div>
             <p className="text-xs text-muted-foreground mt-2">
               Next due: May 25, 2025
             </p>
           </CardContent>
         </Card>
         
-        <Card className="border border-green-100 dark:border-green-900/30">
+        <Card className="border-l-4 border-l-purple-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Notices</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Fee Status</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
+            <div className="text-2xl font-bold text-purple-600">{mockStudent.fees.status}</div>
             <p className="text-xs text-muted-foreground mt-2">
-              Latest: May 15, 2025
+              Due: {formatDate(mockStudent.fees.deadline)}
             </p>
           </CardContent>
         </Card>
       </div>
-      
-      <h3 className="text-2xl font-bold tracking-tight text-green-700 dark:text-green-500 mt-8">Features</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {featureCards.map((card, index) => (
-          <Card key={index} className="border border-green-100 dark:border-green-900/30 hover:shadow-md transition-shadow duration-300 group">
-            <a href={card.link} className="block h-full">
-              <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                <div className="rounded-full p-2 bg-green-50 dark:bg-green-900/20">
-                  {card.icon}
+
+      {/* Quick Access Modules */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Quick Access</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {quickAccessModules.map((module, index) => (
+            <Card key={index} className={`hover:shadow-lg transition-all duration-300 cursor-pointer border-2 ${module.color}`}>
+              <a href={module.link} className="block h-full">
+                <CardHeader className="flex flex-row items-center gap-4 pb-2">
+                  <div className="p-3 rounded-lg bg-white shadow-sm">
+                    {module.icon}
+                  </div>
+                  <div className="flex-1">
+                    <CardTitle className="text-lg font-semibold">{module.title}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-gray-600">
+                    {module.description}
+                  </CardDescription>
+                </CardContent>
+              </a>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Activities */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Recent Activities
+            </CardTitle>
+            <CardDescription>Your latest academic activities</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {recentActivities.map((activity, index) => (
+              <div key={index} className="flex items-start space-x-4 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                {activity.icon}
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-medium">{activity.title}</p>
+                  <p className="text-xs text-muted-foreground">{activity.description}</p>
+                  <p className="text-xs text-blue-600">{activity.time}</p>
                 </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Upcoming Deadlines */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Upcoming Deadlines
+            </CardTitle>
+            <CardDescription>Important dates approaching</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between p-3 border-l-4 border-l-yellow-500 bg-yellow-50 rounded">
+              <div>
+                <p className="font-medium">Digital Signal Processing</p>
+                <p className="text-sm text-muted-foreground">Lab Report Submission</p>
+              </div>
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                2 days left
+              </Badge>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 border-l-4 border-l-orange-500 bg-orange-50 rounded">
+              <div>
+                <p className="font-medium">VLSI Design</p>
+                <p className="text-sm text-muted-foreground">Circuit Simulation</p>
+              </div>
+              <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                5 days left
+              </Badge>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 border-l-4 border-l-red-500 bg-red-50 rounded">
+              <div>
+                <p className="font-medium">Computer Networks</p>
+                <p className="text-sm text-muted-foreground">Socket Programming</p>
+              </div>
+              <Badge variant="secondary" className="bg-red-100 text-red-800">
+                1 week left
+              </Badge>
+            </div>
+            
+            <Button variant="outline" className="w-full mt-4">
+              <Calendar className="h-4 w-4 mr-2" />
+              View Full Calendar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Announcements Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
+            Latest Announcements
+          </CardTitle>
+          <CardDescription>Important notices from administration</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
+              <div className="flex items-start justify-between">
                 <div>
-                  <CardTitle className="text-xl text-green-700 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300 transition-colors">
-                    {card.title}
-                  </CardTitle>
+                  <h4 className="font-semibold text-blue-900">End Semester Examination Schedule</h4>
+                  <p className="text-sm text-blue-700 mt-1">The examination schedule for 6th semester has been released. Please check the academic calendar for detailed timings.</p>
+                  <p className="text-xs text-blue-600 mt-2">Posted on May 15, 2025</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-gray-600 dark:text-gray-300">
-                  {card.description}
-                </CardDescription>
-              </CardContent>
-            </a>
-          </Card>
-        ))}
-      </div>
-      
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="border border-green-100 dark:border-green-900/30">
-          <CardHeader>
-            <CardTitle className="text-green-700 dark:text-green-400">Upcoming Deadlines</CardTitle>
-            <CardDescription>
-              Your upcoming assignment deadlines
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="rounded-full p-1 bg-yellow-500" />
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  Digital Signal Processing: Lab Report
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Due May 25, 2025
-                </p>
+                <Badge className="bg-blue-100 text-blue-800">Important</Badge>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="rounded-full p-1 bg-yellow-500" />
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  VLSI Design: Circuit Simulation
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Due May 28, 2025
-                </p>
+            
+            <div className="p-4 border border-green-200 bg-green-50 rounded-lg">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-semibold text-green-900">Technical Symposium 2025</h4>
+                  <p className="text-sm text-green-700 mt-1">Registration open for the annual technical symposium. Submit your projects before the deadline.</p>
+                  <p className="text-xs text-green-600 mt-2">Posted on May 18, 2025</p>
+                </div>
+                <Badge className="bg-green-100 text-green-800">Event</Badge>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="rounded-full p-1 bg-red-500" />
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  Computer Networks: Socket Programming
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Due June 2, 2025
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-green-100 dark:border-green-900/30">
-          <CardHeader>
-            <CardTitle className="text-green-700 dark:text-green-400">Recent Notices</CardTitle>
-            <CardDescription>
-              Latest announcements from department
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start space-x-4">
-              <span className="rounded px-2 py-1 text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
-                Exam
-              </span>
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  <a href="#" className="hover:underline">
-                    End Semester Exam Schedule
-                  </a>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Posted on May 15, 2025
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-4">
-              <span className="rounded px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                Academic
-              </span>
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  <a href="#" className="hover:underline">
-                    Project Submission Deadline
-                  </a>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Posted on May 18, 2025
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-4">
-              <span className="rounded px-2 py-1 text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                Event
-              </span>
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  <a href="#" className="hover:underline">
-                    Technical Symposium Registration
-                  </a>
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Posted on May 20, 2025
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            
+            <Button variant="ghost" className="w-full text-green-600 hover:text-green-700 hover:bg-green-50">
+              View All Announcements
+              <ExternalLink className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
