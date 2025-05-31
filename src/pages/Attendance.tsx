@@ -373,7 +373,7 @@ export default function Attendance() {
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  Late arrivals (>10 minutes) marked as absent
+                  Late arrivals (more than 10 minutes) marked as absent
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
