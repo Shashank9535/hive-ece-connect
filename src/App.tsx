@@ -17,8 +17,11 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Calendar from "./pages/Calendar";
 import Attendance from "./pages/Attendance";
-
-const queryClient = new QueryClient();
+import Login from "./pages/Login";
+import AdminDashboard from "./pages/AdminDashboard";
+import LeaveApplication from "./pages/LeaveApplication";
+import Research from "./pages/Research";
+import FacultyProfile from "./pages/FacultyProfile";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -28,6 +31,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="assignments" element={<Assignments />} />
@@ -36,9 +41,12 @@ const App = () => (
               <Route path="notices" element={<Notices />} />
               <Route path="about" element={<About />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="faculty-profile" element={<FacultyProfile />} />
               <Route path="calendar" element={<Calendar />} />
               <Route path="attendance" element={<Attendance />} />
-              <Route path="settings" element={<Profile />} /> {/* Temporary using Profile for Settings */}
+              <Route path="leave" element={<LeaveApplication />} />
+              <Route path="research" element={<Research />} />
+              <Route path="settings" element={<Profile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
             <Route path="*" element={<NotFound />} />
