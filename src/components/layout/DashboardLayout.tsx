@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Home, BookOpen, Calendar, Bell, FileText, User, Settings, Users, Clock } from "lucide-react";
+import { Home, BookOpen, Calendar, Bell, FileText, User, Settings, Users, Clock, CreditCard } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -70,6 +70,14 @@ export default function DashboardLayout() {
                     <Link to="/assignments">
                       <FileText className="h-4 w-4" />
                       <span>Assignments</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Fee Payment">
+                    <Link to="/fees">
+                      <CreditCard className="h-4 w-4" />
+                      <span>Fee Payment</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

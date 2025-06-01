@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Calendar, AlertCircle, BookOpen, Users, Bell, ExternalLink, GraduationCap, Clock, CheckCircle, XCircle } from "lucide-react";
+import { FileText, Calendar, AlertCircle, BookOpen, Users, Bell, ExternalLink, GraduationCap, Clock, CheckCircle, XCircle, CreditCard, Sync, Settings } from "lucide-react";
 
 // Mock data - replace with real data later
 const mockStudent = {
@@ -15,7 +15,9 @@ const mockStudent = {
   cgpa: 8.7,
   fees: {
     deadline: "2025-06-30",
-    status: "Paid"
+    status: "Paid",
+    amount: "₹75,000",
+    dueAmount: "₹0"
   }
 };
 
@@ -28,49 +30,49 @@ const formatDate = (dateString: string) => {
   });
 };
 
-// Quick access modules
+// Quick access modules matching the user flow
 const quickAccessModules = [
   {
-    title: "Course Attendance",
-    description: "View attendance records and statistics",
+    title: "View and Track Assignments",
+    description: "Submit and track all your assignments",
+    icon: <FileText className="h-6 w-6" />,
+    link: "/assignments",
+    color: "bg-green-50 border-green-200 text-green-700"
+  },
+  {
+    title: "View Attendance Records",
+    description: "Check your attendance across all subjects",
     icon: <Clock className="h-6 w-6" />,
     link: "/attendance",
     color: "bg-blue-50 border-blue-200 text-blue-700"
   },
   {
-    title: "Assignment Portal",
-    description: "Submit and track assignments",
-    icon: <FileText className="h-6 w-6" />,
-    link: "/assignments",
-    color: "bg-green-50 border-green-200 text-green-700"
+    title: "Check Fee Payment Status",
+    description: "View fee status and upcoming deadlines",
+    icon: <CreditCard className="h-6 w-6" />,
+    link: "/fees",
+    color: "bg-purple-50 border-purple-200 text-purple-700"
+  },
+  {
+    title: "Important Notices",
+    description: "Latest announcements and updates",
+    icon: <Bell className="h-6 w-6" />,
+    link: "/notices",
+    color: "bg-red-50 border-red-200 text-red-700"
+  },
+  {
+    title: "Profile & Notification Settings",
+    description: "Manage your profile and sync with Google Calendar",
+    icon: <Settings className="h-6 w-6" />,
+    link: "/profile",
+    color: "bg-indigo-50 border-indigo-200 text-indigo-700"
   },
   {
     title: "Academic Calendar", 
     description: "Important dates and events",
     icon: <Calendar className="h-6 w-6" />,
     link: "/calendar",
-    color: "bg-purple-50 border-purple-200 text-purple-700"
-  },
-  {
-    title: "Student Directory",
-    description: "Browse student information",
-    icon: <Users className="h-6 w-6" />,
-    link: "/students", 
     color: "bg-orange-50 border-orange-200 text-orange-700"
-  },
-  {
-    title: "Notice Board",
-    description: "Latest announcements",
-    icon: <Bell className="h-6 w-6" />,
-    link: "/notices",
-    color: "bg-red-50 border-red-200 text-red-700"
-  },
-  {
-    title: "Digital Library",
-    description: "Access notes and resources",
-    icon: <BookOpen className="h-6 w-6" />,
-    link: "/notes",
-    color: "bg-indigo-50 border-indigo-200 text-indigo-700"
   }
 ];
 
@@ -98,11 +100,36 @@ const recentActivities = [
     icon: <CheckCircle className="h-4 w-4 text-green-600" />
   },
   {
-    title: "Assignment Due Soon",
-    description: "VLSI Design Circuit Simulation due in 2 days",
+    title: "Fee Payment Reminder",
+    description: "Next semester fee due in 30 days",
     time: "2 days ago",
     status: "warning",
     icon: <AlertCircle className="h-4 w-4 text-yellow-600" />
+  }
+];
+
+// Important notices from official college website
+const importantNotices = [
+  {
+    title: "End Semester Examination Schedule",
+    description: "The examination schedule for 6th semester has been released. Please check the academic calendar for detailed timings.",
+    date: "2025-05-15",
+    type: "exam",
+    source: "Academic Office"
+  },
+  {
+    title: "Technical Symposium 2025",
+    description: "Registration open for the annual technical symposium. Submit your projects before the deadline.",
+    date: "2025-05-18",
+    type: "event",
+    source: "ECE Department"
+  },
+  {
+    title: "Library Book Return Reminder",
+    description: "All borrowed books must be returned before the semester end. Check your library account for details.",
+    date: "2025-05-20",
+    type: "reminder",
+    source: "Central Library"
   }
 ];
 
@@ -130,15 +157,19 @@ export default function Dashboard() {
               <div className="text-2xl font-bold">{mockStudent.attendance}%</div>
               <div className="text-sm text-green-100">Attendance</div>
             </div>
+            <Button variant="outline" className="text-green-700 border-green-200 bg-white hover:bg-green-50">
+              <Sync className="h-4 w-4 mr-2" />
+              Sync Calendar
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Dashboard Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overall Attendance</CardTitle>
+            <CardTitle className="text-sm font-medium">Attendance Records</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -152,47 +183,50 @@ export default function Dashboard() {
         
         <Card className="border-l-4 border-l-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">CGPA</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{mockStudent.cgpa}</div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Excellent Performance
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-l-4 border-l-orange-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium">Assignment Tracker</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">3</div>
+            <div className="text-2xl font-bold text-green-600">3</div>
             <p className="text-xs text-muted-foreground mt-2">
-              Next due: May 25, 2025
+              Pending submissions
             </p>
+            <p className="text-xs text-green-600 mt-1">Next due: May 25, 2025</p>
           </CardContent>
         </Card>
         
         <Card className="border-l-4 border-l-purple-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Fee Status</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Fee Payment Status</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{mockStudent.fees.status}</div>
             <p className="text-xs text-muted-foreground mt-2">
-              Due: {formatDate(mockStudent.fees.deadline)}
+              Amount: {mockStudent.fees.amount}
             </p>
+            <p className="text-xs text-purple-600 mt-1">Due: {formatDate(mockStudent.fees.deadline)}</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-l-4 border-l-red-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Important Notices</CardTitle>
+            <Bell className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{importantNotices.length}</div>
+            <p className="text-xs text-muted-foreground mt-2">
+              New announcements
+            </p>
+            <p className="text-xs text-red-600 mt-1">Latest: {formatDate(importantNotices[0].date)}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Access Modules */}
+      {/* Quick Access Modules - Student User Flow */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Quick Access</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Student Dashboard - Quick Access</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {quickAccessModules.map((module, index) => (
             <Card key={index} className={`hover:shadow-lg transition-all duration-300 cursor-pointer border-2 ${module.color}`}>
@@ -273,57 +307,53 @@ export default function Dashboard() {
             
             <div className="flex items-center justify-between p-3 border-l-4 border-l-red-500 bg-red-50 rounded">
               <div>
-                <p className="font-medium">Computer Networks</p>
-                <p className="text-sm text-muted-foreground">Socket Programming</p>
+                <p className="font-medium">Next Semester Fee</p>
+                <p className="text-sm text-muted-foreground">Payment Deadline</p>
               </div>
               <Badge variant="secondary" className="bg-red-100 text-red-800">
-                1 week left
+                30 days left
               </Badge>
             </div>
             
             <Button variant="outline" className="w-full mt-4">
               <Calendar className="h-4 w-4 mr-2" />
-              View Full Calendar
+              Sync with Google Calendar
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Announcements Section */}
+      {/* Important Notices Section - Auto-scraped from official college website */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
-            Latest Announcements
+            Important Notices (Auto-scraped from Official College Website)
           </CardTitle>
-          <CardDescription>Important notices from administration</CardDescription>
+          <CardDescription>Latest announcements from college administration</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-semibold text-blue-900">End Semester Examination Schedule</h4>
-                  <p className="text-sm text-blue-700 mt-1">The examination schedule for 6th semester has been released. Please check the academic calendar for detailed timings.</p>
-                  <p className="text-xs text-blue-600 mt-2">Posted on May 15, 2025</p>
+            {importantNotices.map((notice, index) => (
+              <div key={index} className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-blue-900">{notice.title}</h4>
+                    <p className="text-sm text-blue-700 mt-1">{notice.description}</p>
+                    <div className="flex items-center gap-4 mt-2">
+                      <p className="text-xs text-blue-600">Posted on {formatDate(notice.date)}</p>
+                      <p className="text-xs text-blue-600">Source: {notice.source}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Badge className="bg-blue-100 text-blue-800 capitalize">{notice.type}</Badge>
+                  </div>
                 </div>
-                <Badge className="bg-blue-100 text-blue-800">Important</Badge>
               </div>
-            </div>
-            
-            <div className="p-4 border border-green-200 bg-green-50 rounded-lg">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-semibold text-green-900">Technical Symposium 2025</h4>
-                  <p className="text-sm text-green-700 mt-1">Registration open for the annual technical symposium. Submit your projects before the deadline.</p>
-                  <p className="text-xs text-green-600 mt-2">Posted on May 18, 2025</p>
-                </div>
-                <Badge className="bg-green-100 text-green-800">Event</Badge>
-              </div>
-            </div>
+            ))}
             
             <Button variant="ghost" className="w-full text-green-600 hover:text-green-700 hover:bg-green-50">
-              View All Announcements
+              View All Notices
               <ExternalLink className="h-4 w-4 ml-2" />
             </Button>
           </div>

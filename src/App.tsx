@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +21,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import LeaveApplication from "./pages/LeaveApplication";
 import Research from "./pages/Research";
 import FacultyProfile from "./pages/FacultyProfile";
+import Fees from "./pages/Fees";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +48,7 @@ const App = () => (
               <Route path="attendance" element={<Attendance />} />
               <Route path="leave" element={<LeaveApplication />} />
               <Route path="research" element={<Research />} />
+              <Route path="fees" element={<Fees />} />
               <Route path="settings" element={<Profile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
