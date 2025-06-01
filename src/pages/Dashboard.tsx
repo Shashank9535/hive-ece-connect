@@ -1,9 +1,8 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Calendar, AlertCircle, BookOpen, Users, Bell, ExternalLink, GraduationCap, Clock, CheckCircle, XCircle, CreditCard, Sync, Settings } from "lucide-react";
+import { FileText, Calendar, AlertCircle, BookOpen, Users, Bell, ExternalLink, GraduationCap, Clock, CheckCircle, XCircle, CreditCard, RefreshCw, Settings } from "lucide-react";
 
 // Mock data - replace with real data later
 const mockStudent = {
@@ -158,7 +157,7 @@ export default function Dashboard() {
               <div className="text-sm text-green-100">Attendance</div>
             </div>
             <Button variant="outline" className="text-green-700 border-green-200 bg-white hover:bg-green-50">
-              <Sync className="h-4 w-4 mr-2" />
+              <RefreshCw className="h-4 w-4 mr-2" />
               Sync Calendar
             </Button>
           </div>
