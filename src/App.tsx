@@ -1,10 +1,12 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 
+import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import Assignments from "./pages/Assignments";
@@ -22,8 +24,20 @@ import LeaveApplication from "./pages/LeaveApplication";
 import Research from "./pages/Research";
 import FacultyProfile from "./pages/FacultyProfile";
 import Fees from "./pages/Fees";
+import { useAuth } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
+
+// Dashboard router component to handle role-based redirection
+const DashboardRouter = () => {
+  const { user } = useAuth();
+  
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin-dashboard" replace />;
+  }
+  
+  return <Dashboard />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -34,9 +48,27 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="/" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
+            
+            {/* Admin-only route */}
+            <Route 
+              path="/admin-dashboard" 
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Protected student/faculty routes */}
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<DashboardRouter />} />
               <Route path="assignments" element={<Assignments />} />
               <Route path="students" element={<Students />} />
               <Route path="notes" element={<Notes />} />
@@ -50,8 +82,8 @@ const App = () => (
               <Route path="research" element={<Research />} />
               <Route path="fees" element={<Fees />} />
               <Route path="settings" element={<Profile />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             </Route>
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from '@/hooks/useAuth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,26 +16,37 @@ const Login = () => {
   const [role, setRole] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
     if (!email || !password || !role) {
       setError('Please fill in all fields');
+      setLoading(false);
       return;
     }
 
-    // Simulate authentication
-    localStorage.setItem('userRole', role);
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('isAuthenticated', 'true');
-    
-    // Redirect based on role
-    if (role === 'admin') {
-      navigate('/admin-dashboard');
-    } else {
-      navigate('/dashboard');
+    try {
+      // Simulate authentication delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Use the auth hook to login
+      login(email, role);
+      
+      // Redirect based on role
+      if (role === 'admin') {
+        navigate('/admin-dashboard');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError('Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,7 +61,7 @@ const Login = () => {
           <div className="mx-auto w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mb-4">
             <span className="text-white text-2xl font-bold">HIVE</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Hive ECE Connect</h1>
+          <h1 className="text-3xl font-bold text-gray-900">CampusHive</h1>
           <p className="text-gray-600 mt-2">Human Resource Management System</p>
           <p className="text-sm text-gray-500">Electronics & Communication Engineering Department</p>
         </div>
@@ -78,6 +90,7 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full"
+                  disabled={loading}
                 />
               </div>
 
@@ -91,6 +104,7 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pr-10"
+                    disabled={loading}
                   />
                   <Button
                     type="button"
@@ -98,6 +112,7 @@ const Login = () => {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4 text-gray-400" />
@@ -110,11 +125,12 @@ const Login = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
-                <Select value={role} onValueChange={setRole}>
+                <Select value={role} onValueChange={setRole} disabled={loading}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="student">Student</SelectItem>
                     <SelectItem value="faculty">Faculty</SelectItem>
                     <SelectItem value="staff">Staff</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
@@ -122,8 +138,12 @@ const Login = () => {
                 </Select>
               </div>
 
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-                Login to Portal
+              <Button 
+                type="submit" 
+                className="w-full bg-green-600 hover:bg-green-700"
+                disabled={loading}
+              >
+                {loading ? 'Logging in...' : 'Login to Portal'}
               </Button>
 
               <div className="text-center">
@@ -132,6 +152,7 @@ const Login = () => {
                   variant="link"
                   onClick={handleForgotPassword}
                   className="text-sm text-green-600 hover:text-green-700"
+                  disabled={loading}
                 >
                   Forgot Password?
                 </Button>
@@ -141,7 +162,7 @@ const Login = () => {
         </Card>
 
         <div className="text-center mt-6 text-xs text-gray-500">
-          <p>© 2024 Hive ECE Connect - Electronics & Communication Engineering</p>
+          <p>© 2024 CampusHive - Electronics & Communication Engineering</p>
           <p>Powered by HRMS Portal System</p>
         </div>
       </div>

@@ -12,9 +12,11 @@ import {
   SidebarMenuButton,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Home, BookOpen, Calendar, Bell, FileText, User, Settings, Users, Clock, CreditCard } from "lucide-react";
-import { Link, Outlet } from "react-router-dom";
+import { Home, BookOpen, Calendar, Bell, FileText, User, Settings, Users, Clock, CreditCard, LogOut } from "lucide-react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 // CampusHive logo component based on the uploaded image
 function CampusHiveLogo() {
@@ -33,6 +35,14 @@ function CampusHiveLogo() {
 }
 
 export default function DashboardLayout() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -139,6 +149,12 @@ export default function DashboardLayout() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
+                    <LogOut className="h-4 w-4" />
+                    <span>Logout</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroup>
           </SidebarContent>
@@ -154,13 +170,16 @@ export default function DashboardLayout() {
           <div className="flex items-center justify-between border-b border-green-100 dark:border-green-800/30 p-4 bg-white dark:bg-gray-950">
             <div className="flex items-center gap-2">
               <SidebarTrigger />
-              <h1 className="font-semibold text-green-700 dark:text-green-400">Campus Hive</h1>
+              <h1 className="font-semibold text-green-700 dark:text-green-400">CampusHive</h1>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm">John Doe</span>
+              <span className="text-sm">{user?.email?.split('@')[0] || 'User'}</span>
               <div className="h-8 w-8 rounded-full bg-green-600 text-white flex items-center justify-center">
-                JD
+                {user?.email?.charAt(0).toUpperCase() || 'U'}
               </div>
+              <Button onClick={handleLogout} size="sm" variant="outline" className="ml-2">
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           </div>
           <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-64px)] overflow-auto">
