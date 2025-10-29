@@ -17,6 +17,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import HiveBot from "@/components/chatbot/HiveBot";
 
 // CampusHive logo component based on the uploaded image
 function CampusHiveLogo() {
@@ -187,6 +188,7 @@ export default function DashboardLayout() {
           </div>
         </main>
       </div>
+      <HiveBot />
     </SidebarProvider>
   );
 }
