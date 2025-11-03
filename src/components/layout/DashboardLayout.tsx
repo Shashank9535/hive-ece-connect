@@ -174,9 +174,9 @@ export default function DashboardLayout() {
               <h1 className="font-semibold text-green-700 dark:text-green-400">CampusHive</h1>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm">{user?.name || 'User'}</span>
+              <span className="text-sm">{user?.email?.split('@')[0] || 'User'}</span>
               <div className="h-8 w-8 rounded-full bg-green-600 text-white flex items-center justify-center">
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
+                {user?.email?.charAt(0).toUpperCase() || 'U'}
               </div>
               <Button onClick={handleLogout} size="sm" variant="outline" className="ml-2">
                 <LogOut className="h-4 w-4" />

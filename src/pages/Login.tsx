@@ -11,8 +11,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 
 const Login = () => {
-  const [name, setName] = useState('');
-  const [usn, setUsn] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,31 +23,29 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     
-    if (!name || !usn || !password || !role) {
+    if (!email || !password || !role) {
       setError('Please fill in all fields');
       setLoading(false);
       return;
     }
 
     try {
-      const result = await login(usn, password, name, role as 'admin' | 'faculty' | 'staff' | 'student');
+      // Simulate authentication delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (result.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
-      }
+      // Use the auth hook to login
+      login(email, role);
       
       // Redirect based on role
-      if (role === 'admin' || role === 'faculty' || role === 'staff') {
+      if (role === 'admin') {
         navigate('/admin-dashboard');
       } else {
         navigate('/');
       }
     } catch (err) {
       setError('Login failed. Please check your credentials.');
+    } finally {
       setLoading(false);
     }
   };
@@ -85,26 +82,13 @@ const Login = () => {
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="email">Email Address</Label>
                 <Input
-                  id="name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full"
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="usn">USN</Label>
-                <Input
-                  id="usn"
-                  type="text"
-                  placeholder="Enter your USN"
-                  value={usn}
-                  onChange={(e) => setUsn(e.target.value.toUpperCase())}
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full"
                   disabled={loading}
                 />
@@ -116,7 +100,7 @@ const Login = () => {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Use your USN as password"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pr-10"
