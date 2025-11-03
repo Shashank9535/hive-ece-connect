@@ -108,7 +108,7 @@ export const useAuth = () => {
       });
 
       if (signInError) {
-        // If user doesn't exist, create account
+        // If user doesn't exist, create account with role in metadata
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -116,20 +116,14 @@ export const useAuth = () => {
             data: {
               name,
               usn,
+              role, // Pass role in metadata so trigger can use it
             },
           },
         });
 
         if (signUpError) throw signUpError;
 
-        // Add role for new user
         if (signUpData.user) {
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .insert({ user_id: signUpData.user.id, role });
-
-          if (roleError) throw roleError;
-
           const userData = await fetchUserProfile(signUpData.user);
           setUser(userData);
         }
