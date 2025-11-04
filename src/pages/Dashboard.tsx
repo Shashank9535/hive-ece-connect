@@ -4,21 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Calendar, AlertCircle, BookOpen, Users, Bell, ExternalLink, GraduationCap, Clock, CheckCircle, XCircle, CreditCard, RefreshCw, Settings } from "lucide-react";
 
-// Mock data - replace with real data later
-const mockStudent = {
-  name: "John Doe",
-  rollNumber: "3VY22UE001",
-  department: "Electronics and Computer Engineering",
-  semester: "6th Semester",
-  attendance: 85,
-  cgpa: 8.7,
-  fees: {
-    deadline: "2025-06-30",
-    status: "Paid",
-    amount: "₹75,000",
-    dueAmount: "₹0"
-  }
-};
+import { useAuth } from "@/hooks/useAuth";
 
 // Format date for display
 const formatDate = (dateString: string) => {
@@ -133,6 +119,18 @@ const importantNotices = [
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth();
+
+  // Mock data for now - will be replaced with real data from database
+  const mockAttendance = 85;
+  const mockCgpa = 8.7;
+  const mockFees = {
+    deadline: "2025-06-30",
+    status: "Paid",
+    amount: "₹75,000",
+    dueAmount: "₹0"
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -141,19 +139,19 @@ export default function Dashboard() {
           <div>
             <h1 className="text-3xl font-bold">Welcome to CampusHive</h1>
             <p className="text-green-100 mt-2">
-              {mockStudent.name} | {mockStudent.rollNumber} | {mockStudent.department}
+              {user?.name || 'Student'} | {user?.usn || 'USN'} | Electronics and Computer Engineering
             </p>
             <p className="text-green-100">
-              {mockStudent.semester} | Academic Year 2024-25
+              6th Semester | Academic Year 2024-25
             </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold">{mockStudent.cgpa}</div>
+              <div className="text-2xl font-bold">{mockCgpa}</div>
               <div className="text-sm text-green-100">CGPA</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{mockStudent.attendance}%</div>
+              <div className="text-2xl font-bold">{mockAttendance}%</div>
               <div className="text-sm text-green-100">Attendance</div>
             </div>
             <Button variant="outline" className="text-green-700 border-green-200 bg-white hover:bg-green-50">
@@ -172,10 +170,10 @@ export default function Dashboard() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{mockStudent.attendance}%</div>
-            <Progress value={mockStudent.attendance} className="mt-2" />
+            <div className="text-2xl font-bold text-blue-600">{mockAttendance}%</div>
+            <Progress value={mockAttendance} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-2">
-              {mockStudent.attendance >= 75 ? "✓ Meets requirement" : "⚠ Below requirement"}
+              {mockAttendance >= 75 ? "✓ Meets requirement" : "⚠ Below requirement"}
             </p>
           </CardContent>
         </Card>
@@ -200,11 +198,11 @@ export default function Dashboard() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{mockStudent.fees.status}</div>
+            <div className="text-2xl font-bold text-purple-600">{mockFees.status}</div>
             <p className="text-xs text-muted-foreground mt-2">
-              Amount: {mockStudent.fees.amount}
+              Amount: {mockFees.amount}
             </p>
-            <p className="text-xs text-purple-600 mt-1">Due: {formatDate(mockStudent.fees.deadline)}</p>
+            <p className="text-xs text-purple-600 mt-1">Due: {formatDate(mockFees.deadline)}</p>
           </CardContent>
         </Card>
         

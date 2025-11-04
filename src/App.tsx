@@ -32,10 +32,12 @@ const queryClient = new QueryClient();
 const DashboardRouter = () => {
   const { user } = useAuth();
   
-  if (user?.role === 'admin') {
+  // Admin, faculty, and staff go to admin dashboard
+  if (user?.role === 'admin' || user?.role === 'faculty' || user?.role === 'staff') {
     return <Navigate to="/admin-dashboard" replace />;
   }
   
+  // Students go to student dashboard
   return <Dashboard />;
 };
 
@@ -49,11 +51,11 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<Login />} />
             
-            {/* Admin-only route */}
+            {/* Admin, Faculty, and Staff route */}
             <Route 
               path="/admin-dashboard" 
               element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute staffOrFacultyOrAdmin>
                   <AdminDashboard />
                 </ProtectedRoute>
               } 

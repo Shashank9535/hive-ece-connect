@@ -7,9 +7,15 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: string;
   adminOnly?: boolean;
+  staffOrFacultyOrAdmin?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole, adminOnly }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  requiredRole, 
+  adminOnly,
+  staffOrFacultyOrAdmin 
+}) => {
   const { user, loading, isAuthenticated } = useAuth();
 
   if (loading) {
@@ -26,6 +32,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
 
   // Check admin-only access
   if (adminOnly && user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  // Check staff/faculty/admin access
+  if (staffOrFacultyOrAdmin && !['admin', 'faculty', 'staff'].includes(user?.role || '')) {
     return <Navigate to="/" replace />;
   }
 
