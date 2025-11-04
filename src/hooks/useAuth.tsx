@@ -101,6 +101,8 @@ export const useAuth = () => {
       // For this demo, we'll use USN as email domain
       const email = `${usn.toLowerCase()}@campushive.edu`;
       
+      console.log('Attempting login with email:', email);
+      
       // Try to sign in
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
@@ -108,11 +110,14 @@ export const useAuth = () => {
       });
 
       if (signInError) {
+        console.log('Sign in failed, attempting sign up:', signInError.message);
+        
         // If user doesn't exist, create account with role in metadata
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
+            emailRedirectTo: `${window.location.origin}/`,
             data: {
               name,
               usn,
@@ -121,21 +126,31 @@ export const useAuth = () => {
           },
         });
 
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          console.error('Sign up error:', signUpError);
+          throw signUpError;
+        }
+
+        console.log('Sign up successful:', signUpData.user?.id);
 
         if (signUpData.user) {
+          // Wait a bit for trigger to complete
+          await new Promise(resolve => setTimeout(resolve, 1000));
           const userData = await fetchUserProfile(signUpData.user);
+          console.log('User profile fetched:', userData);
           setUser(userData);
         }
       } else if (signInData.user) {
+        console.log('Sign in successful:', signInData.user.id);
         const userData = await fetchUserProfile(signInData.user);
+        console.log('User profile fetched:', userData);
         setUser(userData);
       }
 
       return { error: null };
     } catch (error: any) {
       console.error('Login error:', error);
-      return { error: error.message };
+      return { error: error.message || 'Login failed. Please try again.' };
     }
   };
 
