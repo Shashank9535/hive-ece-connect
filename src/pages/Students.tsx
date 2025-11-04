@@ -29,7 +29,7 @@ export default function Students() {
       student.usn.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const canViewDetails = user?.role === 'faculty' || user?.role === 'staff' || user?.role === 'admin';
+  const canViewDetails = user?.role === 'faculty' || user?.role === 'staff';
 
   const handleStudentClick = (student: StudentData) => {
     if (canViewDetails) {

@@ -14,7 +14,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600"></div>
       </div>
     );
@@ -24,8 +24,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
     return <Navigate to="/login" replace />;
   }
 
-  // Check admin-only access (admin, faculty, staff have full access)
-  if (adminOnly && user?.role !== 'admin' && user?.role !== 'faculty' && user?.role !== 'staff') {
+  // Check admin-only access
+  if (adminOnly && user?.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
