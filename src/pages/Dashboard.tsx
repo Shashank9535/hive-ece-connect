@@ -1,15 +1,15 @@
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Calendar, AlertCircle, BookOpen, Users, Bell, ExternalLink, GraduationCap, Clock, CheckCircle, XCircle, CreditCard, RefreshCw, Settings } from "lucide-react";
+import { FileText, Calendar, AlertCircle, Clock, CheckCircle, CreditCard, RefreshCw, Settings, Bell, ExternalLink } from "lucide-react";
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import HiveBot from '@/components/chatbot/HiveBot';
 
-// Mock data - replace with real data later
+// Mock data for demo
 const mockStudent = {
-  name: "John Doe",
-  rollNumber: "3VY22UE001",
-  department: "Electronics and Computer Engineering",
-  semester: "6th Semester",
   attendance: 85,
   cgpa: 8.7,
   fees: {
@@ -133,6 +133,25 @@ const importantNotices = [
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const [profileData, setProfileData] = useState<any>(null);
+  
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user?.id) {
+        const { data } = await (supabase as any)
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        
+        setProfileData(data);
+      }
+    };
+    
+    fetchProfile();
+  }, [user?.id]);
+  
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -141,10 +160,10 @@ export default function Dashboard() {
           <div>
             <h1 className="text-3xl font-bold">Welcome to CampusHive</h1>
             <p className="text-green-100 mt-2">
-              {mockStudent.name} | {mockStudent.rollNumber} | {mockStudent.department}
+              {user?.name || 'Student'} {user?.usn && `| ${user.usn}`}
             </p>
             <p className="text-green-100">
-              {mockStudent.semester} | Academic Year 2024-25
+              Electronics and Computer Engineering | 6th Semester | Academic Year 2024-25
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -358,6 +377,8 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+      
+      <HiveBot />
     </div>
   );
 }

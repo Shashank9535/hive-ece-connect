@@ -30,13 +30,21 @@ const queryClient = new QueryClient();
 
 // Dashboard router component to handle role-based redirection
 const DashboardRouter = () => {
-  const { user } = useAuth();
-  
-  if (user?.role === 'admin') {
+  const { isStaffOrFacultyOrAdmin, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (isStaffOrFacultyOrAdmin) {
     return <Navigate to="/admin-dashboard" replace />;
   }
-  
-  return <Dashboard />;
+
+  return <Navigate to="/dashboard" replace />;
 };
 
 const App = () => (
@@ -49,11 +57,11 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<Login />} />
             
-            {/* Admin-only route */}
+            {/* Admin/Faculty/Staff route */}
             <Route 
               path="/admin-dashboard" 
               element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute staffOrFacultyOrAdmin>
                   <AdminDashboard />
                 </ProtectedRoute>
               } 
@@ -69,6 +77,7 @@ const App = () => (
               }
             >
               <Route index element={<DashboardRouter />} />
+              <Route path="dashboard" element={<Dashboard />} />
               <Route path="assignments" element={<Assignments />} />
               <Route path="students" element={<Students />} />
               <Route path="notes" element={<Notes />} />

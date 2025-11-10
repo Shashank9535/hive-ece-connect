@@ -1,21 +1,20 @@
-
-import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: string;
-  adminOnly?: boolean;
+  requireAdmin?: boolean;
+  staffOrFacultyOrAdmin?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole, adminOnly }) => {
-  const { user, loading, isAuthenticated } = useAuth();
+const ProtectedRoute = ({ children, requireAdmin = false, staffOrFacultyOrAdmin = false }: ProtectedRouteProps) => {
+  const { isAuthenticated, isAdmin, isStaffOrFacultyOrAdmin, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -24,14 +23,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
     return <Navigate to="/login" replace />;
   }
 
-  // Check admin-only access
-  if (adminOnly && user?.role !== 'admin') {
-    return <Navigate to="/" replace />;
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // Check specific role requirement
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/" replace />;
+  if (staffOrFacultyOrAdmin && !isStaffOrFacultyOrAdmin) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
