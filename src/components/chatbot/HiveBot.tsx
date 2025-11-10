@@ -35,7 +35,7 @@ const HiveBot = () => {
       setMessages([
         {
           role: 'assistant',
-          content: `Hi! I'm HiveBot 🐝 — your smart CampusHive assistant. ${user ? `Welcome ${user.email}!` : ''} How can I help you today?`,
+          content: `Hi Buddy! 👋 I'm HiveBot 🐝 — your smart CampusHive assistant. How can I help you today?`,
         },
       ]);
     }
