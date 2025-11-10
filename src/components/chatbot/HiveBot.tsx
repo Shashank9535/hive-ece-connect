@@ -32,11 +32,10 @@ const HiveBot = () => {
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      const greeting = user?.name ? `Welcome ${user.name}!` : 'Welcome buddy!';
       setMessages([
         {
           role: 'assistant',
-          content: `Hi! I'm HiveBot 🐝 — your smart CampusHive assistant. ${greeting} How can I help you today?`,
+          content: `Hi! I'm HiveBot 🐝 — your smart CampusHive assistant. ${user ? `Welcome ${user.email}!` : ''} How can I help you today?`,
         },
       ]);
     }

@@ -8,7 +8,6 @@ import AssignmentsManagement from '@/components/admin/AssignmentsManagement';
 import AttendanceMonitoring from '@/components/admin/AttendanceMonitoring';
 import FeesManagement from '@/components/admin/FeesManagement';
 import UserManagement from '@/components/admin/UserManagement';
-import HiveBot from '@/components/chatbot/HiveBot';
 
 const AdminDashboard = () => {
   const [pendingLeaves, setPendingLeaves] = useState([
@@ -78,7 +77,6 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-      <HiveBot />
     </div>
   );
 };

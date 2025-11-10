@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,71 +11,48 @@ import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 
 const Login = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [usn, setUsn] = useState('');
   const [role, setRole] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn, signUp, isAuthenticated, user } = useAuth();
+  const { login } = useAuth();
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      if (user.role === 'admin' || user.role === 'faculty' || user.role === 'staff') {
-        navigate('/admin-dashboard');
-      } else {
-        navigate('/');
-      }
-    }
-  }, [isAuthenticated, user, navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     
     if (!email || !password || !role) {
-      setError('Please fill in all required fields');
-      setLoading(false);
-      return;
-    }
-
-    if (isSignUp && (!name || !usn)) {
-      setError('Please provide your name and USN');
+      setError('Please fill in all fields');
       setLoading(false);
       return;
     }
 
     try {
-      if (isSignUp) {
-        const { error } = await signUp(email, password, name, usn, role);
-        if (error) {
-          setError(error.message);
-        } else {
-          setError('');
-          // Success message
-          alert('Account created successfully! Please check your email to confirm your account.');
-        }
+      // Simulate authentication delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Use the auth hook to login
+      login(email, role);
+      
+      // Redirect based on role
+      if (role === 'admin') {
+        navigate('/admin-dashboard');
       } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          setError(error.message);
-        } else {
-          // Navigation will be handled by useEffect above
-        }
+        navigate('/');
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      setError('Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleForgotPassword = () => {
+    alert('Password reset link sent to your email!');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
@@ -91,49 +68,17 @@ const Login = () => {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-center text-green-700">
-              {isSignUp ? 'Sign Up for HRMS Portal' : 'Login to HRMS Portal'}
-            </CardTitle>
+            <CardTitle className="text-center text-green-700">Login to HRMS Portal</CardTitle>
             <CardDescription className="text-center">
-              {isSignUp ? 'Create your account' : 'Enter your credentials to access the system'}
+              Enter your credentials to access the system
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4">
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
-              )}
-              
-              {isSignUp && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full"
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="usn">USN</Label>
-                    <Input
-                      id="usn"
-                      type="text"
-                      placeholder="Enter your USN (e.g., 3VY22UE001)"
-                      value={usn}
-                      onChange={(e) => setUsn(e.target.value)}
-                      className="w-full"
-                      disabled={loading}
-                    />
-                  </div>
-                </>
               )}
               
               <div className="space-y-2">
@@ -198,18 +143,18 @@ const Login = () => {
                 className="w-full bg-green-600 hover:bg-green-700"
                 disabled={loading}
               >
-                {loading ? (isSignUp ? 'Creating Account...' : 'Logging in...') : (isSignUp ? 'Sign Up' : 'Login to Portal')}
+                {loading ? 'Logging in...' : 'Login to Portal'}
               </Button>
 
               <div className="text-center">
                 <Button
                   type="button"
                   variant="link"
-                  onClick={() => setIsSignUp(!isSignUp)}
+                  onClick={handleForgotPassword}
                   className="text-sm text-green-600 hover:text-green-700"
                   disabled={loading}
                 >
-                  {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
+                  Forgot Password?
                 </Button>
               </div>
             </form>
