@@ -11,19 +11,48 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, studentData } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const { messages, studentData, allStudents, userRole } = await req.json();
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
     
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!OPENROUTER_API_KEY) {
+      throw new Error("OPENROUTER_API_KEY is not configured");
+    }
+
+    // Build student directory for faculty/staff/admin
+    let studentDirectory = '';
+    if (allStudents && allStudents.length > 0 && (userRole === 'faculty' || userRole === 'staff' || userRole === 'admin')) {
+      studentDirectory = `
+COMPLETE STUDENT DIRECTORY (${allStudents.length} students):
+${allStudents.map((s: any, index: number) => `
+${index + 1}. ${s.name} (USN: ${s.usn})
+   - Attendance: ${s.attendance}%
+   - Assignments: ${s.assignmentsCompleted}/5
+   - Fee Status: ${s.feeStatus}
+   - CGPA: ${s.cgpa}
+   - SGPAs: Sem1: ${s.sgpa?.sem1 || 'N/A'}, Sem2: ${s.sgpa?.sem2 || 'N/A'}, Sem3: ${s.sgpa?.sem3 || 'N/A'}, Sem4: ${s.sgpa?.sem4 || 'N/A'}, Sem5: ${s.sgpa?.sem5 || 'N/A'}, Sem6: ${s.sgpa?.sem6 || 'N/A'}
+`).join('')}`;
     }
 
     // Build context-aware system prompt
-    const systemPrompt = `You are HiveBot 🐝, the smart virtual assistant for CampusHive - an academic dashboard platform for VTU ECE 6th Semester students.
+    const systemPrompt = `You are HiveBot 🐝, an intelligent AI assistant for CampusHive - an academic dashboard platform.
 
-Your role is to help students with their academic queries by providing personalized information based on their data.
+YOUR CAPABILITIES:
+1. CAMPUS ASSISTANT: Help with attendance, assignments, fees, calendar events, and academic performance
+2. GENERAL KNOWLEDGE: Answer ANY question on any topic - technology, science, engineering concepts, software engineering, programming, etc.
+3. STUDY HELPER: Explain concepts, provide study materials guidance, answer academic questions
 
-STUDENT CONTEXT:
+USER ROLE: ${userRole || 'student'}
+
+${userRole === 'faculty' || userRole === 'staff' || userRole === 'admin' ? `
+AS A ${userRole?.toUpperCase()}, YOU CAN:
+- Look up ANY student's details by name or USN
+- Provide attendance reports, fee status, academic performance for any student
+- Answer questions about class performance statistics
+- Help with general teaching and administrative queries
+
+${studentDirectory}
+` : `
+CURRENT STUDENT CONTEXT:
 ${studentData ? `
 - Name: ${studentData.name}
 - USN: ${studentData.usn}
@@ -32,48 +61,34 @@ ${studentData ? `
 - Fee Status: ${studentData.feeStatus}
 - Next Event: ${studentData.upcomingEvent}
 - Current CGPA: ${studentData.cgpa}
-- Semester SGPAs: 
-  - Sem 1: ${studentData.sgpa.sem1}
-  - Sem 2: ${studentData.sgpa.sem2}
-  - Sem 3: ${studentData.sgpa.sem3}
-  - Sem 4: ${studentData.sgpa.sem4}
-  - Sem 5: ${studentData.sgpa.sem5}
-  - Sem 6: ${studentData.sgpa.sem6}
-` : 'No student data available - user not logged in or data not found.'}
+` : 'No student data available.'}
+`}
 
-CAPABILITIES:
-- Answer questions about attendance, assignments, fees, calendar events, and academic performance
-- Provide personalized insights based on the student's data
-- Guide navigation to different sections of the website
-- Offer study tips and academic guidance
-- Respond in a friendly, helpful, and encouraging manner
+RESPONSE GUIDELINES:
+- For campus queries: Use the student data provided above
+- For general knowledge questions (like "What is software engineering?"): Provide accurate, helpful explanations
+- Be friendly and use emojis occasionally 🎓
+- Keep responses clear and informative
+- For faculty/staff: When asked about a student, search the directory by name or USN and provide their details
+- Address students as "Buddy" and faculty/staff respectfully
 
-GUIDELINES:
-- ALWAYS address the user as "Buddy" - never use their actual name
-- Always use the student's actual data when answering questions
-- Be encouraging about their academic progress
-- If attendance is below 75%, gently remind them to improve
-- If CGPA is above 8.5, congratulate them on excellent performance
-- Provide specific, actionable advice
-- Keep responses concise but informative
-- Use emojis occasionally to be friendly but remain professional
+IMPORTANT: You are a FULL AI assistant. Answer ANY question - whether it's about campus data OR general knowledge like programming, engineering concepts, science, etc.`;
 
-When you don't have specific information, politely guide the user to the appropriate section of the website.`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
+        "HTTP-Referer": "https://campushive.app",
+        "X-Title": "CampusHive HiveBot",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-preview-05-20",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,
         ],
-        temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 1000,
       }),
     });
 
@@ -101,12 +116,12 @@ When you don't have specific information, politely guide the user to the appropr
         );
       }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI service error");
+      console.error("OpenRouter error:", response.status, errorText);
+      throw new Error("AI service error: " + errorText);
     }
 
     const data = await response.json();
-    const reply = data.choices[0].message.content;
+    const reply = data.choices?.[0]?.message?.content || "I couldn't generate a response. Please try again.";
 
     return new Response(
       JSON.stringify({ reply }),
