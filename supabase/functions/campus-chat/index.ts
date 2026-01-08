@@ -12,10 +12,10 @@ serve(async (req) => {
 
   try {
     const { messages, studentData, allStudents, userRole } = await req.json();
-    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
-    if (!OPENROUTER_API_KEY) {
-      throw new Error("OPENROUTER_API_KEY is not configured");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     // Build student directory for faculty/staff/admin
@@ -29,7 +29,6 @@ ${index + 1}. ${s.name} (USN: ${s.usn})
    - Assignments: ${s.assignmentsCompleted}/5
    - Fee Status: ${s.feeStatus}
    - CGPA: ${s.cgpa}
-   - SGPAs: Sem1: ${s.sgpa?.sem1 || 'N/A'}, Sem2: ${s.sgpa?.sem2 || 'N/A'}, Sem3: ${s.sgpa?.sem3 || 'N/A'}, Sem4: ${s.sgpa?.sem4 || 'N/A'}, Sem5: ${s.sgpa?.sem5 || 'N/A'}, Sem6: ${s.sgpa?.sem6 || 'N/A'}
 `).join('')}`;
     }
 
@@ -74,16 +73,18 @@ RESPONSE GUIDELINES:
 
 IMPORTANT: You are a FULL AI assistant. Answer ANY question - whether it's about campus data OR general knowledge like programming, engineering concepts, science, etc.`;
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    console.log("Sending request to Lovable AI gateway...");
+    console.log("User role:", userRole);
+    console.log("Number of students in directory:", allStudents?.length || 0);
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://campushive.app",
-        "X-Title": "CampusHive HiveBot",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-preview-05-20",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,
@@ -116,12 +117,14 @@ IMPORTANT: You are a FULL AI assistant. Answer ANY question - whether it's about
         );
       }
       const errorText = await response.text();
-      console.error("OpenRouter error:", response.status, errorText);
+      console.error("AI gateway error:", response.status, errorText);
       throw new Error("AI service error: " + errorText);
     }
 
     const data = await response.json();
     const reply = data.choices?.[0]?.message?.content || "I couldn't generate a response. Please try again.";
+
+    console.log("Successfully received response from AI");
 
     return new Response(
       JSON.stringify({ reply }),
