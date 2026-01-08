@@ -17,8 +17,8 @@ const AdminHeader = () => {
   return (
     <div className="mb-8 flex justify-between items-center">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Dashboard</h1>
-        <p className="text-gray-600">CampusHive - AI-Powered Campus Management System</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+        <p className="text-gray-600">Hive ECE Connect - Human Resource Management System</p>
       </div>
       <Button onClick={handleLogout} variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
         <LogOut className="h-4 w-4 mr-2" />

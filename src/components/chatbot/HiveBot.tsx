@@ -32,13 +32,10 @@ const HiveBot = () => {
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      const isFacultyOrStaff = user?.role === 'faculty' || user?.role === 'staff' || user?.role === 'admin';
       setMessages([
         {
           role: 'assistant',
-          content: isFacultyOrStaff 
-            ? `Hello! 👋 I'm HiveBot 🐝 — your AI assistant. I can help you look up any student's details, answer questions about your class, or assist with any general knowledge queries!`
-            : `Hi Buddy! 👋 I'm HiveBot 🐝 — your smart AI assistant. I can help you with campus info, explain concepts, or answer any question you have!`,
+          content: `Hi Buddy! 👋 I'm HiveBot 🐝 — your smart CampusHive assistant. How can I help you today?`,
         },
       ]);
     }
@@ -46,35 +43,26 @@ const HiveBot = () => {
 
   const getCurrentStudentData = () => {
     if (!user) return null;
-    // Match student by USN if available
-    if (user.usn) {
-      const matchedStudent = studentData.find(s => s.usn === user.usn);
-      if (matchedStudent) return matchedStudent;
-    }
-    // For demo, return first student for students without USN match
-    if (user.role === 'student') {
-      return studentData[0];
-    }
-    return null;
+    // In a real app, you'd match by user ID or email
+    // For demo, we'll use the first student
+    return studentData[0];
   };
 
   const handleQuickAction = (action: string) => {
     const currentStudent = getCurrentStudentData();
-    const isFacultyOrStaff = user?.role === 'faculty' || user?.role === 'staff' || user?.role === 'admin';
     
     const actionMap: Record<string, string> = {
-      attendance: isFacultyOrStaff 
-        ? 'Show me the attendance overview of all students'
-        : `What's my attendance percentage?`,
-      assignments: isFacultyOrStaff 
-        ? 'Which students have pending assignments?'
-        : `What assignments do I need to complete?`,
-      fees: isFacultyOrStaff 
-        ? 'Show students with pending fee status'
-        : `What's my fee payment status?`,
+      attendance: currentStudent 
+        ? `What's my attendance percentage?` 
+        : 'Show me attendance information',
+      assignments: currentStudent 
+        ? `What assignments do I need to complete?` 
+        : 'Tell me about assignments',
+      fees: currentStudent 
+        ? `What's my fee payment status?` 
+        : 'Show fee information',
       notices: 'Show me recent notices',
       help: 'What can you help me with?',
-      students: 'List all students with their details',
     };
 
     const message = actionMap[action] || action;
@@ -92,7 +80,6 @@ const HiveBot = () => {
 
     try {
       const currentStudent = getCurrentStudentData();
-      const isFacultyOrStaff = user?.role === 'faculty' || user?.role === 'staff' || user?.role === 'admin';
       
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/campus-chat`,
@@ -108,8 +95,6 @@ const HiveBot = () => {
               content: m.content,
             })),
             studentData: currentStudent,
-            allStudents: isFacultyOrStaff ? studentData : null,
-            userRole: user?.role || 'student',
           }),
         }
       );
@@ -134,6 +119,7 @@ const HiveBot = () => {
         variant: 'destructive',
       });
       
+      // Add error message to chat
       setMessages((prev) => [
         ...prev,
         {
@@ -146,17 +132,11 @@ const HiveBot = () => {
     }
   };
 
-  const isFacultyOrStaff = user?.role === 'faculty' || user?.role === 'staff' || user?.role === 'admin';
-
-  const quickActions = isFacultyOrStaff ? [
-    { id: 'students', label: 'All Students', icon: '👥' },
-    { id: 'attendance', label: 'Attendance', icon: '📊' },
+  const quickActions = [
+    { id: 'attendance', label: 'View Attendance', icon: '📊' },
+    { id: 'assignments', label: 'Check Assignments', icon: '📝' },
     { id: 'fees', label: 'Fee Status', icon: '💰' },
-    { id: 'help', label: 'Help', icon: '❓' },
-  ] : [
-    { id: 'attendance', label: 'My Attendance', icon: '📊' },
-    { id: 'assignments', label: 'Assignments', icon: '📝' },
-    { id: 'fees', label: 'Fee Status', icon: '💰' },
+    { id: 'notices', label: 'Show Notices', icon: '📢' },
     { id: 'help', label: 'Help', icon: '❓' },
   ];
 
@@ -178,10 +158,8 @@ const HiveBot = () => {
             <CardTitle className="flex items-center gap-2 text-lg">
               <span className="text-2xl">🐝</span>
               <div>
-                <div className="font-bold">HiveBot AI</div>
-                <div className="text-xs opacity-90">
-                  {isFacultyOrStaff ? 'Faculty Assistant' : 'Your Smart Assistant'}
-                </div>
+                <div className="font-bold">HiveBot</div>
+                <div className="text-xs opacity-90">Your Campus Assistant</div>
               </div>
             </CardTitle>
           </CardHeader>
@@ -244,7 +222,7 @@ const HiveBot = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder={isFacultyOrStaff ? "Ask about students or anything..." : "Ask me anything..."}
+                  placeholder="Ask me anything..."
                   disabled={isLoading}
                   className="flex-1"
                 />

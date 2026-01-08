@@ -158,7 +158,7 @@ export default function Dashboard() {
       <div className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg p-6 shadow-lg">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">AI Dashboard</h1>
+            <h1 className="text-3xl font-bold">Welcome to CampusHive</h1>
             <p className="text-green-100 mt-2">
               {user?.name || 'Student'} {user?.usn && `| ${user.usn}`}
             </p>
