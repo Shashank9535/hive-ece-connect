@@ -136,6 +136,8 @@ export const useAuth = () => {
     logout,
     isAuthenticated: !!user?.isAuthenticated,
     isAdmin: user?.role === 'admin',
+    isFaculty: user?.role === 'faculty',
+    isStaff: user?.role === 'staff',
     isStaffOrFacultyOrAdmin: user?.role === 'staff' || user?.role === 'faculty' || user?.role === 'admin',
     isStudent: user?.role === 'student',
   };

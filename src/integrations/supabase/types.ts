@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      notes: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_url: string | null
+          id: string
+          subject_code: string
+          subject_name: string
+          title: string
+          uploaded_by: string | null
+          uploaded_by_name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          subject_code: string
+          subject_name: string
+          title: string
+          uploaded_by?: string | null
+          uploaded_by_name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          id?: string
+          subject_code?: string
+          subject_name?: string
+          title?: string
+          uploaded_by?: string | null
+          uploaded_by_name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

@@ -1,1 +1,7 @@
 project_id = "yieufouqngabmgntresy"
+
+[functions.campus-chat]
+verify_jwt = false
+
+[functions.send-note-notification]
+verify_jwt = false
