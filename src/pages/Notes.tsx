@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FileText, Download, PlusCircle, Loader2, Trash2 } from "lucide-react";
+import { FileText, Download, PlusCircle, Loader2, Trash2, Upload, File } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -35,11 +35,13 @@ interface Note {
 export default function Notes() {
   const { user, isFaculty, isStaff, isAdmin } = useAuth();
   const canUpload = isFaculty || isStaff || isAdmin;
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const [newNote, setNewNote] = useState({
     subjectCode: "",
@@ -90,6 +92,42 @@ export default function Notes() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== "application/pdf") {
+        toast.error("Please select a PDF file");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error("File size must be less than 10MB");
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `${newNote.subjectCode}/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from("course-notes")
+      .upload(filePath, file);
+
+    if (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("course-notes")
+      .getPublicUrl(filePath);
+
+    return urlData.publicUrl;
+  };
+
   const handleUpload = async () => {
     if (!newNote.subjectCode || !newNote.title) {
       toast.error("Please fill in all required fields");
@@ -104,6 +142,13 @@ export default function Notes() {
 
     setUploading(true);
     try {
+      let fileUrl: string | null = null;
+
+      // Upload file if selected
+      if (selectedFile) {
+        fileUrl = await uploadFile(selectedFile);
+      }
+
       const { data, error } = await (supabase as any)
         .from("notes")
         .insert({
@@ -111,6 +156,7 @@ export default function Notes() {
           subject_code: selectedSubject.code,
           title: newNote.title,
           description: newNote.description || null,
+          file_url: fileUrl,
           uploaded_by: user?.id,
           uploaded_by_name: user?.name || "Unknown",
         })
@@ -122,6 +168,10 @@ export default function Notes() {
       toast.success("Note uploaded successfully!");
       setNotes([data, ...notes]);
       setNewNote({ subjectCode: "", title: "", description: "" });
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       setDialogOpen(false);
 
       // Send email notification
@@ -140,21 +190,40 @@ export default function Notes() {
     }
   };
 
-  const handleDelete = async (noteId: string) => {
+  const handleDelete = async (note: Note) => {
     try {
+      // Delete file from storage if exists
+      if (note.file_url) {
+        const urlParts = note.file_url.split("/course-notes/");
+        if (urlParts[1]) {
+          const filePath = decodeURIComponent(urlParts[1]);
+          await supabase.storage.from("course-notes").remove([filePath]);
+        }
+      }
+
       const { error } = await (supabase as any)
         .from("notes")
         .delete()
-        .eq("id", noteId);
+        .eq("id", note.id);
 
       if (error) throw error;
 
-      setNotes(notes.filter(n => n.id !== noteId));
+      setNotes(notes.filter(n => n.id !== note.id));
       toast.success("Note deleted successfully");
     } catch (error: any) {
       console.error("Error deleting note:", error);
       toast.error("Failed to delete note");
     }
+  };
+
+  const handleDownload = (fileUrl: string, title: string) => {
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = `${title}.pdf`;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const formatDate = (dateString: string) => {
@@ -233,6 +302,48 @@ export default function Notes() {
                     onChange={(e) => setNewNote({ ...newNote, description: e.target.value })}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="file">PDF File (optional)</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      ref={fileInputRef}
+                      id="file"
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      {selectedFile ? selectedFile.name : "Choose PDF file"}
+                    </Button>
+                  </div>
+                  {selectedFile && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <File className="h-4 w-4" />
+                      <span>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedFile(null);
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = "";
+                          }
+                        }}
+                        className="h-auto p-1 text-destructive"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  )}
+                </div>
                 <Button onClick={handleUpload} disabled={uploading} className="w-full">
                   {uploading ? (
                     <>
@@ -276,13 +387,16 @@ export default function Notes() {
               <CardContent>
                 <div className="space-y-4">
                   {subject.notes.map((note) => (
-                    <div key={note.id} className="flex items-center justify-between border-b pb-2">
+                    <div key={note.id} className="flex items-center justify-between border-b pb-3">
                       <div className="flex items-center space-x-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
+                        <div className={`p-2 rounded ${note.file_url ? 'bg-primary/10' : 'bg-muted'}`}>
+                          <FileText className={`h-5 w-5 ${note.file_url ? 'text-primary' : 'text-muted-foreground'}`} />
+                        </div>
                         <div>
                           <p className="text-sm font-medium">{note.title}</p>
                           <p className="text-xs text-muted-foreground">
                             Uploaded by {note.uploaded_by_name} on {formatDate(note.created_at)}
+                            {note.file_url && <span className="ml-2 text-primary">• PDF attached</span>}
                           </p>
                           {note.description && (
                             <p className="text-xs text-muted-foreground mt-1">{note.description}</p>
@@ -290,14 +404,22 @@ export default function Notes() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Download className="h-4 w-4" />
-                        </Button>
+                        {note.file_url && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleDownload(note.file_url!, note.title)}
+                            title="Download PDF"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        )}
                         {canUpload && note.uploaded_by === user?.id && (
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            onClick={() => handleDelete(note.id)}
+                            onClick={() => handleDelete(note)}
+                            title="Delete note"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
