@@ -1,40 +1,162 @@
-
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, PlusCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { FileText, Download, PlusCircle, Loader2, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
-const mockSubjects = [
-  {
-    id: 1,
-    name: "Digital Signal Processing",
-    code: "15EC61",
-    notes: [
-      { id: 101, title: "Module 1: Signals and Systems", type: "pdf", size: "2.4 MB", uploadedBy: "Prof. Sharma", date: "2023-04-10" },
-      { id: 102, title: "Module 2: Fourier Transform", type: "pdf", size: "3.1 MB", uploadedBy: "Prof. Sharma", date: "2023-04-17" },
-      { id: 103, title: "Module 3: Z-Transform", type: "pdf", size: "1.8 MB", uploadedBy: "Prof. Sharma", date: "2023-04-24" },
-    ]
-  },
-  {
-    id: 2,
-    name: "Computer Networks",
-    code: "15EC62",
-    notes: [
-      { id: 201, title: "Module 1: Network Models", type: "pdf", size: "1.9 MB", uploadedBy: "Prof. Reddy", date: "2023-04-12" },
-      { id: 202, title: "Module 2: Data Link Layer", type: "pdf", size: "2.5 MB", uploadedBy: "Prof. Reddy", date: "2023-04-19" },
-    ]
-  },
-  {
-    id: 3,
-    name: "VLSI Design",
-    code: "15EC63",
-    notes: [
-      { id: 301, title: "Module 1: CMOS Technology", type: "pdf", size: "3.2 MB", uploadedBy: "Prof. Kumar", date: "2023-04-15" },
-      { id: 302, title: "Module 2: Circuit Design", type: "pdf", size: "2.8 MB", uploadedBy: "Prof. Kumar", date: "2023-04-22" },
-    ]
-  }
+const subjects = [
+  { name: "Digital Communication", code: "21EC61" },
+  { name: "Microcontrollers", code: "21EC62" },
+  { name: "Digital Signal Processing", code: "21EC63" },
+  { name: "VLSI Design", code: "21EC64" },
+  { name: "Embedded Systems", code: "21EC651" },
+  { name: "Information Theory & Coding", code: "21EC652" },
 ];
 
+interface Note {
+  id: string;
+  subject_name: string;
+  subject_code: string;
+  title: string;
+  description: string | null;
+  file_url: string | null;
+  uploaded_by: string | null;
+  uploaded_by_name: string;
+  created_at: string;
+}
+
 export default function Notes() {
+  const { user, isFaculty, isStaff, isAdmin } = useAuth();
+  const canUpload = isFaculty || isStaff || isAdmin;
+  
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  const [newNote, setNewNote] = useState({
+    subjectCode: "",
+    title: "",
+    description: "",
+  });
+
+  const fetchNotes = async () => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from("notes")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setNotes(data || []);
+    } catch (error: any) {
+      console.error("Error fetching notes:", error);
+      toast.error("Failed to load notes");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+
+  const sendEmailNotification = async (noteData: { subjectName: string; subjectCode: string; noteTitle: string; uploadedBy: string }) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("send-note-notification", {
+        body: {
+          ...noteData,
+          recipientEmail: "hshashank847@gmail.com",
+        },
+      });
+
+      if (error) {
+        console.error("Error sending email notification:", error);
+        toast.error("Note uploaded but email notification failed");
+        return;
+      }
+
+      console.log("Email notification sent:", data);
+      toast.success("Email notification sent to students!");
+    } catch (error) {
+      console.error("Error invoking email function:", error);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!newNote.subjectCode || !newNote.title) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    const selectedSubject = subjects.find(s => s.code === newNote.subjectCode);
+    if (!selectedSubject) {
+      toast.error("Invalid subject selected");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from("notes")
+        .insert({
+          subject_name: selectedSubject.name,
+          subject_code: selectedSubject.code,
+          title: newNote.title,
+          description: newNote.description || null,
+          uploaded_by: user?.id,
+          uploaded_by_name: user?.name || "Unknown",
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success("Note uploaded successfully!");
+      setNotes([data, ...notes]);
+      setNewNote({ subjectCode: "", title: "", description: "" });
+      setDialogOpen(false);
+
+      // Send email notification
+      await sendEmailNotification({
+        subjectName: selectedSubject.name,
+        subjectCode: selectedSubject.code,
+        noteTitle: newNote.title,
+        uploadedBy: user?.name || "Faculty",
+      });
+
+    } catch (error: any) {
+      console.error("Error uploading note:", error);
+      toast.error("Failed to upload note: " + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (noteId: string) => {
+    try {
+      const { error } = await (supabase as any)
+        .from("notes")
+        .delete()
+        .eq("id", noteId);
+
+      if (error) throw error;
+
+      setNotes(notes.filter(n => n.id !== noteId));
+      toast.success("Note deleted successfully");
+    } catch (error: any) {
+      console.error("Error deleting note:", error);
+      toast.error("Failed to delete note");
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -42,6 +164,16 @@ export default function Notes() {
       day: "numeric"
     });
   };
+
+  // Group notes by subject
+  const notesBySubject = notes.reduce((acc, note) => {
+    const key = note.subject_code;
+    if (!acc[key]) {
+      acc[key] = { name: note.subject_name, code: note.subject_code, notes: [] };
+    }
+    acc[key].notes.push(note);
+    return acc;
+  }, {} as Record<string, { name: string; code: string; notes: Note[] }>);
   
   return (
     <div className="space-y-6">
@@ -52,42 +184,133 @@ export default function Notes() {
             Access lecture notes and study materials
           </p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Upload Notes
-        </Button>
+        {canUpload && (
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Upload Notes
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Upload New Notes</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Subject *</Label>
+                  <Select
+                    value={newNote.subjectCode}
+                    onValueChange={(value) => setNewNote({ ...newNote, subjectCode: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subjects.map((subject) => (
+                        <SelectItem key={subject.code} value={subject.code}>
+                          {subject.name} ({subject.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="title">Note Title *</Label>
+                  <Input
+                    id="title"
+                    placeholder="e.g., Module 1: Introduction to DSP"
+                    value={newNote.title}
+                    onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description (optional)</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Brief description of the notes..."
+                    value={newNote.description}
+                    onChange={(e) => setNewNote({ ...newNote, description: e.target.value })}
+                  />
+                </div>
+                <Button onClick={handleUpload} disabled={uploading} className="w-full">
+                  {uploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    "Upload & Notify Students"
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
       
-      <div className="space-y-6">
-        {mockSubjects.map((subject) => (
-          <Card key={subject.id}>
-            <CardHeader>
-              <CardTitle>{subject.name}</CardTitle>
-              <CardDescription>Course Code: {subject.code}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {subject.notes.map((note) => (
-                  <div key={note.id} className="flex items-center justify-between border-b pb-2">
-                    <div className="flex items-center space-x-3">
-                      <FileText className="h-5 w-5 text-muted-foreground" />
-                      <div>
-                        <p className="text-sm font-medium">{note.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {note.size} • {note.type.toUpperCase()} • Uploaded by {note.uploadedBy} on {formatDate(note.date)}
-                        </p>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : Object.keys(notesBySubject).length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No notes uploaded yet</p>
+            {canUpload && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Click "Upload Notes" to add study materials
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          {Object.values(notesBySubject).map((subject) => (
+            <Card key={subject.code}>
+              <CardHeader>
+                <CardTitle>{subject.name}</CardTitle>
+                <CardDescription>Course Code: {subject.code}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {subject.notes.map((note) => (
+                    <div key={note.id} className="flex items-center justify-between border-b pb-2">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">{note.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Uploaded by {note.uploaded_by_name} on {formatDate(note.created_at)}
+                          </p>
+                          {note.description && (
+                            <p className="text-xs text-muted-foreground mt-1">{note.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon">
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        {canUpload && note.uploaded_by === user?.id && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleDelete(note.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
